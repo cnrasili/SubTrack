@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# AI tools
+.claude/
+.cursor/
+.aider*
+.copilot/
+
+# Project internals
+SUBTRACK_PROJECT_PLAN.md
+
+# Test coverage
+coverage/
