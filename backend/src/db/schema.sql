@@ -20,6 +20,11 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
+CREATE TABLE IF NOT EXISTS budgets (
+  currency TEXT PRIMARY KEY CHECK(currency IN ('TRY', 'USD', 'EUR')),
+  amount REAL NOT NULL CHECK(amount > 0)
+);
+
 CREATE TABLE IF NOT EXISTS subscription_price_history (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   subscription_id INTEGER NOT NULL,

@@ -29,4 +29,8 @@ const api = {
   getPriceHistory: (id) => request('GET', `/subscriptions/${id}/history`),
 
   getSummary: () => request('GET', '/summary'),
+
+  getBudgets: () => request('GET', '/budgets'),
+  setBudget: (currency, amount) => request('PUT', `/budgets/${currency}`, { amount }),
+  deleteBudget: (currency) => request('DELETE', `/budgets/${currency}`),
 };

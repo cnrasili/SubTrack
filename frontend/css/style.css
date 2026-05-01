@@ -128,3 +128,19 @@ p { margin: 8px 0; }
 
 tr.urgent td { background: #ffd7d7; }
 tr.soon td { background: #fff3cd; }
+
+.budget-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.budget-row:last-child { border-bottom: none; }
+.budget-currency { font-weight: 600; min-width: 36px; }
+.budget-spent { min-width: 140px; font-size: 0.9rem; }
+.budget-bar-wrap { flex: 1; background: #f0f0f0; border-radius: 4px; height: 8px; min-width: 80px; }
+.budget-bar { height: 8px; border-radius: 4px; transition: width 0.3s; }
+.budget-bar.under { background: #28a745; }
+.budget-bar.warning { background: #ffc107; }
+.budget-bar.over { background: #e94560; }

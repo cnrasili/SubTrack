@@ -11,10 +11,12 @@ app.use(express.json());
 const categoryRoutes = require('./routes/categories');
 const subscriptionRoutes = require('./routes/subscriptions');
 const summaryRoutes = require('./routes/summary');
+const budgetRoutes = require('./routes/budgets');
 
 app.use('/api/categories', categoryRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/summary', summaryRoutes);
+app.use('/api/budgets', budgetRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use((err, req, res, next) => {
