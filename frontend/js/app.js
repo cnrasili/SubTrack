@@ -1,5 +1,3 @@
-const views = {};
-
 function navigate(viewName) {
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   const link = document.querySelector(`nav a[data-view="${viewName}"]`);
