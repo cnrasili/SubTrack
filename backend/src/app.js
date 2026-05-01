@@ -1,7 +1,10 @@
 const express = require('express');
+const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('../swagger.json');
 const app = express();
+
+app.use(express.static(path.join(__dirname, '../../frontend')));
 
 app.use(express.json());
 
