@@ -10,6 +10,7 @@ views.categories = {
           <form id="cat-form">
             <input type="hidden" id="cat-id">
             <input type="text" id="cat-name" placeholder="Category name" required>
+            <input type="color" id="cat-color" value="#6c757d" title="Category color">
             <button type="submit">Save</button>
             <button type="button" id="cat-cancel" style="display:none">Cancel</button>
           </form>
@@ -18,10 +19,10 @@ views.categories = {
             <tbody>
               ${categories.map(c => `
                 <tr>
-                  <td>${c.name}</td>
+                  <td><span class="color-dot" style="background:${c.color}"></span>${c.name}</td>
                   <td>${c.created_at.slice(0, 10)}</td>
                   <td>
-                    <button data-action="edit" data-id="${c.id}" data-name="${c.name}">Edit</button>
+                    <button data-action="edit" data-id="${c.id}" data-name="${c.name}" data-color="${c.color}">Edit</button>
                     <button data-action="delete" data-id="${c.id}">Delete</button>
                   </td>
                 </tr>
@@ -32,13 +33,14 @@ views.categories = {
 
         const form = document.getElementById('cat-form');
         const nameInput = document.getElementById('cat-name');
+        const colorInput = document.getElementById('cat-color');
         const idInput = document.getElementById('cat-id');
         const cancelBtn = document.getElementById('cat-cancel');
 
         form.addEventListener('submit', e => {
           e.preventDefault();
           const id = idInput.value;
-          const data = { name: nameInput.value.trim() };
+          const data = { name: nameInput.value.trim(), color: colorInput.value };
           const action = id ? api.updateCategory(id, data) : api.createCategory(data);
           action
             .then(() => views.categories.render())
@@ -48,16 +50,18 @@ views.categories = {
         cancelBtn.addEventListener('click', () => {
           idInput.value = '';
           nameInput.value = '';
+          colorInput.value = '#6c757d';
           cancelBtn.style.display = 'none';
         });
 
         app.addEventListener('click', e => {
           const btn = e.target.closest('[data-action]');
           if (!btn) return;
-          const { action, id, name } = btn.dataset;
+          const { action, id, name, color } = btn.dataset;
           if (action === 'edit') {
             idInput.value = id;
             nameInput.value = name;
+            colorInput.value = color;
             nameInput.focus();
             cancelBtn.style.display = '';
           }

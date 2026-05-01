@@ -8,6 +8,7 @@ views.subscriptions = {
         const catOptions = categories.map(c =>
           `<option value="${c.id}">${c.name}</option>`
         ).join('');
+        const catMap = Object.fromEntries(categories.map(c => [c.id, c]));
 
         app.innerHTML = `
           <h2>Subscriptions</h2>
@@ -47,13 +48,14 @@ views.subscriptions = {
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
             </select>
+            <input type="text" id="sub-notes" placeholder="Notes (optional)">
             <button type="submit">Save</button>
             <button type="button" id="sub-cancel" style="display:none">Cancel</button>
           </form>
 
           <table>
             <thead>
-              <tr><th>Name</th><th>Cost</th><th>Period</th><th>Next Payment</th><th>Active</th><th></th></tr>
+              <tr><th>Name</th><th>Category</th><th>Cost</th><th>Period</th><th>Next Payment</th><th>Active</th><th></th></tr>
             </thead>
             <tbody id="subs-tbody"></tbody>
           </table>
@@ -73,20 +75,29 @@ views.subscriptions = {
         const subMap = Object.fromEntries(subscriptions.map(s => [s.id, s]));
 
         const renderRows = subs => {
-          document.getElementById('subs-tbody').innerHTML = subs.map(s => `
-            <tr data-id="${s.id}">
-              <td>${s.name}</td>
-              <td>${s.cost.toFixed(2)} ${s.currency}</td>
-              <td>${s.billing_period}</td>
-              <td>${s.next_payment_date}</td>
-              <td>${s.is_active ? 'Yes' : 'No'}</td>
-              <td>
-                <button data-action="edit" data-id="${s.id}">Edit</button>
-                <button data-action="delete" data-id="${s.id}">Delete</button>
-                <button data-action="history" data-id="${s.id}" data-name="${s.name}">History</button>
-              </td>
-            </tr>
-          `).join('');
+          document.getElementById('subs-tbody').innerHTML = subs.map(s => {
+            const cat = catMap[s.category_id];
+            return `
+              <tr data-id="${s.id}">
+                <td>
+                  ${s.name}
+                  ${s.notes ? `<span class="sub-notes">${s.notes}</span>` : ''}
+                </td>
+                <td>
+                  ${cat ? `<span class="color-dot" style="background:${cat.color}"></span>${cat.name}` : '—'}
+                </td>
+                <td>${s.cost.toFixed(2)} ${s.currency}</td>
+                <td>${s.billing_period}</td>
+                <td>${s.next_payment_date}</td>
+                <td>${s.is_active ? 'Yes' : 'No'}</td>
+                <td>
+                  <button data-action="edit" data-id="${s.id}">Edit</button>
+                  <button data-action="delete" data-id="${s.id}">Delete</button>
+                  <button data-action="history" data-id="${s.id}" data-name="${s.name}">History</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
         };
 
         renderRows(subscriptions);
@@ -123,6 +134,7 @@ views.subscriptions = {
             next_payment_date: document.getElementById('sub-date').value,
             category_id: parseInt(document.getElementById('sub-category').value),
             currency: document.getElementById('sub-currency').value,
+            notes: document.getElementById('sub-notes').value.trim(),
             is_active: 1,
           };
           const action = id ? api.updateSubscription(id, data) : api.createSubscription(data);
@@ -151,6 +163,7 @@ views.subscriptions = {
             document.getElementById('sub-date').value = s.next_payment_date;
             document.getElementById('sub-category').value = s.category_id;
             document.getElementById('sub-currency').value = s.currency;
+            document.getElementById('sub-notes').value = s.notes ?? '';
             cancelBtn.style.display = '';
             form.scrollIntoView({ behavior: 'smooth' });
           }

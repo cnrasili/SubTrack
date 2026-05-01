@@ -13,13 +13,21 @@ views.dashboard = {
             </div>
           `).join('');
 
-        const upcomingRows = upcoming.map(s => `
-          <tr>
-            <td>${s.name}</td>
-            <td>${s.cost.toFixed(2)} ${s.currency}</td>
-            <td>${s.next_payment_date}</td>
-          </tr>
-        `).join('');
+        const today = new Date().toISOString().slice(0, 10);
+        const in3 = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+
+        const upcomingRows = upcoming.map(s => {
+          const urgency = s.next_payment_date <= today ? 'urgent'
+            : s.next_payment_date <= in3 ? 'soon'
+            : '';
+          return `
+            <tr class="${urgency}">
+              <td>${s.name}</td>
+              <td>${s.cost.toFixed(2)} ${s.currency}</td>
+              <td>${s.next_payment_date}</td>
+            </tr>
+          `;
+        }).join('');
 
         app.innerHTML = `
           <h2>Dashboard</h2>

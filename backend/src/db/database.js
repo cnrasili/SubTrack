@@ -14,6 +14,12 @@ db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
 db.exec(schema);
 
+// Add color column to categories if missing
+const catCols = db.pragma('table_info(categories)').map(c => c.name);
+if (!catCols.includes('color')) {
+  db.exec("ALTER TABLE categories ADD COLUMN color TEXT NOT NULL DEFAULT '#6c757d'");
+}
+
 // Migrate price history table: replace single currency column with old_currency + new_currency
 const histCols = db.pragma('table_info(subscription_price_history)').map(c => c.name);
 if (histCols.includes('currency') && !histCols.includes('old_currency')) {

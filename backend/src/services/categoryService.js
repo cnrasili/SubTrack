@@ -14,15 +14,15 @@ function getCategoryById(id) {
 function createCategory(data) {
   const now = new Date().toISOString();
   const result = db.prepare(
-    'INSERT INTO categories (name, created_at) VALUES (?, ?)'
-  ).run(data.name, now);
+    'INSERT INTO categories (name, color, created_at) VALUES (?, ?, ?)'
+  ).run(data.name, data.color, now);
   return getCategoryById(result.lastInsertRowid);
 }
 
-// Updates category name and returns updated row, or null if not found
+// Updates category and returns updated row, or null if not found
 function updateCategory(id, data) {
   if (!getCategoryById(id)) return null;
-  db.prepare('UPDATE categories SET name = ? WHERE id = ?').run(data.name, id);
+  db.prepare('UPDATE categories SET name = ?, color = ? WHERE id = ?').run(data.name, data.color, id);
   return getCategoryById(id);
 }
 
