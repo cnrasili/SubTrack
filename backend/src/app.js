@@ -1,4 +1,6 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('../swagger');
 const app = express();
 
 app.use(express.json());
@@ -10,8 +12,8 @@ const summaryRoutes = require('./routes/summary');
 app.use('/api/categories', categoryRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/summary', summaryRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Global error handler
 app.use((err, req, res, next) => {
   res.status(500).json({ error: 'INTERNAL_ERROR', message: 'An unexpected error occurred' });
 });
