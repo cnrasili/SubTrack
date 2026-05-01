@@ -45,20 +45,42 @@ function createSubscription(data) {
   return getSubscriptionById(result.lastInsertRowid);
 }
 
-// Updates subscription and returns updated row, or null if not found
+// Updates subscription; records price history if cost changed
 function updateSubscription(id, data) {
-  if (!getSubscriptionById(id)) return null;
+  const existing = getSubscriptionById(id);
+  if (!existing) return null;
   const now = new Date().toISOString();
-  db.prepare(`
-    UPDATE subscriptions
-    SET name = ?, cost = ?, billing_period = ?, next_payment_date = ?,
-        category_id = ?, currency = ?, notes = ?, is_active = ?, updated_at = ?
-    WHERE id = ?
-  `).run(
-    data.name, data.cost, data.billing_period, data.next_payment_date,
-    data.category_id, data.currency, data.notes ?? '', data.is_active ?? 1, now, id
-  );
+
+  const update = db.transaction(() => {
+    if (data.cost !== existing.cost) {
+      db.prepare(`
+        INSERT INTO subscription_price_history
+          (subscription_id, old_cost, new_cost, old_currency, new_currency, changed_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(id, existing.cost, data.cost, existing.currency, data.currency ?? existing.currency, now);
+    }
+    db.prepare(`
+      UPDATE subscriptions
+      SET name = ?, cost = ?, billing_period = ?, next_payment_date = ?,
+          category_id = ?, currency = ?, notes = ?, is_active = ?, updated_at = ?
+      WHERE id = ?
+    `).run(
+      data.name, data.cost, data.billing_period, data.next_payment_date,
+      data.category_id, data.currency, data.notes ?? '', data.is_active ?? 1, now, id
+    );
+  });
+
+  update();
   return getSubscriptionById(id);
+}
+
+// Returns price history for a subscription ordered by most recent first
+function getPriceHistory(id) {
+  return db.prepare(`
+    SELECT * FROM subscription_price_history
+    WHERE subscription_id = ?
+    ORDER BY changed_at DESC
+  `).all(id);
 }
 
 // Deletes subscription and returns null if not found
@@ -86,4 +108,5 @@ module.exports = {
   updateSubscription,
   deleteSubscription,
   getUpcomingPayments,
+  getPriceHistory,
 };

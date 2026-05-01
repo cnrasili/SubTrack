@@ -55,23 +55,41 @@ views.subscriptions = {
             <thead>
               <tr><th>Name</th><th>Cost</th><th>Period</th><th>Next Payment</th><th>Active</th><th></th></tr>
             </thead>
-            <tbody>
-              ${subscriptions.map(s => `
-                <tr data-id="${s.id}">
-                  <td>${s.name}</td>
-                  <td>${s.cost.toFixed(2)} ${s.currency}</td>
-                  <td>${s.billing_period}</td>
-                  <td>${s.next_payment_date}</td>
-                  <td>${s.is_active ? 'Yes' : 'No'}</td>
-                  <td>
-                    <button data-action="edit" data-id="${s.id}">Edit</button>
-                    <button data-action="delete" data-id="${s.id}">Delete</button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
+            <tbody id="subs-tbody"></tbody>
           </table>
+
+          <div id="price-history-panel" style="display:none">
+            <h3 id="history-title"></h3>
+            <table id="history-table">
+              <thead>
+                <tr><th>Old Price</th><th>New Price</th><th>Date</th></tr>
+              </thead>
+              <tbody id="history-tbody"></tbody>
+            </table>
+            <button id="history-close">Close</button>
+          </div>
         `;
+
+        const subMap = Object.fromEntries(subscriptions.map(s => [s.id, s]));
+
+        const renderRows = subs => {
+          document.getElementById('subs-tbody').innerHTML = subs.map(s => `
+            <tr data-id="${s.id}">
+              <td>${s.name}</td>
+              <td>${s.cost.toFixed(2)} ${s.currency}</td>
+              <td>${s.billing_period}</td>
+              <td>${s.next_payment_date}</td>
+              <td>${s.is_active ? 'Yes' : 'No'}</td>
+              <td>
+                <button data-action="edit" data-id="${s.id}">Edit</button>
+                <button data-action="delete" data-id="${s.id}">Delete</button>
+                <button data-action="history" data-id="${s.id}" data-name="${s.name}">History</button>
+              </td>
+            </tr>
+          `).join('');
+        };
+
+        renderRows(subscriptions);
 
         const getFilters = () => ({
           q: document.getElementById('filter-q').value,
@@ -80,7 +98,14 @@ views.subscriptions = {
           is_active: document.getElementById('filter-active').value,
         });
 
-        document.getElementById('filter-q').addEventListener('input', () => views.subscriptions.render(getFilters()));
+        document.getElementById('filter-q').addEventListener('input', () => {
+          api.getSubscriptions(getFilters())
+            .then(subs => {
+              subs.forEach(s => { subMap[s.id] = s; });
+              renderRows(subs);
+            })
+            .catch(err => alert(err.message));
+        });
         document.getElementById('filter-category').addEventListener('change', () => views.subscriptions.render(getFilters()));
         document.getElementById('filter-period').addEventListener('change', () => views.subscriptions.render(getFilters()));
         document.getElementById('filter-active').addEventListener('change', () => views.subscriptions.render(getFilters()));
@@ -112,8 +137,6 @@ views.subscriptions = {
           cancelBtn.style.display = 'none';
         });
 
-        const subMap = Object.fromEntries(subscriptions.map(s => [s.id, s]));
-
         app.addEventListener('click', e => {
           const btn = e.target.closest('[data-action]');
           if (!btn) return;
@@ -138,6 +161,30 @@ views.subscriptions = {
               .then(() => views.subscriptions.render())
               .catch(err => alert(err.message));
           }
+
+          if (action === 'history') {
+            const panel = document.getElementById('price-history-panel');
+            document.getElementById('history-title').textContent = `Price History — ${btn.dataset.name}`;
+            document.getElementById('history-tbody').innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+            panel.style.display = '';
+            api.getPriceHistory(id)
+              .then(rows => {
+                document.getElementById('history-tbody').innerHTML = rows.length === 0
+                  ? '<tr><td colspan="3">No price changes recorded yet.</td></tr>'
+                  : rows.map(r => `
+                      <tr>
+                        <td>${r.old_cost.toFixed(2)} ${r.old_currency}</td>
+                        <td>${r.new_cost.toFixed(2)} ${r.new_currency}</td>
+                        <td>${r.changed_at.slice(0, 10)}</td>
+                      </tr>
+                    `).join('');
+              })
+              .catch(err => alert(err.message));
+          }
+        });
+
+        document.getElementById('history-close').addEventListener('click', () => {
+          document.getElementById('price-history-panel').style.display = 'none';
         });
       })
       .catch(err => { app.innerHTML = `<p class="error">${err.message}</p>`; });

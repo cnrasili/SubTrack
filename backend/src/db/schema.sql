@@ -18,3 +18,14 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   updated_at TEXT NOT NULL,
   FOREIGN KEY (category_id) REFERENCES categories(id)
 );
+
+CREATE TABLE IF NOT EXISTS subscription_price_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  subscription_id INTEGER NOT NULL,
+  old_cost REAL NOT NULL,
+  new_cost REAL NOT NULL,
+  old_currency TEXT NOT NULL,
+  new_currency TEXT NOT NULL,
+  changed_at TEXT NOT NULL,
+  FOREIGN KEY (subscription_id) REFERENCES subscriptions(id)
+);

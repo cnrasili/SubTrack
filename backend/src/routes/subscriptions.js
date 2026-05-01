@@ -22,6 +22,12 @@ router.get('/', (req, res) => {
   res.json(subscriptionService.getAllSubscriptions(filters));
 });
 
+router.get('/:id/history', (req, res) => {
+  const subscription = subscriptionService.getSubscriptionById(req.params.id);
+  if (!subscription) return res.status(404).json({ error: 'SUBSCRIPTION_NOT_FOUND', message: 'Subscription not found' });
+  res.json(subscriptionService.getPriceHistory(req.params.id));
+});
+
 router.get('/:id', (req, res) => {
   const subscription = subscriptionService.getSubscriptionById(req.params.id);
   if (!subscription) return res.status(404).json({ error: 'SUBSCRIPTION_NOT_FOUND', message: 'Subscription not found' });

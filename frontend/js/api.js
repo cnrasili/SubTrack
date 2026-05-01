@@ -26,6 +26,7 @@ const api = {
   updateSubscription: (id, data) => request('PUT', `/subscriptions/${id}`, data),
   deleteSubscription: (id) => request('DELETE', `/subscriptions/${id}`),
   getUpcoming: (days = 7) => request('GET', `/subscriptions/upcoming?days=${days}`),
+  getPriceHistory: (id) => request('GET', `/subscriptions/${id}/history`),
 
   getSummary: () => request('GET', '/summary'),
 };

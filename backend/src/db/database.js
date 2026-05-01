@@ -14,6 +14,24 @@ db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
 db.exec(schema);
 
+// Migrate price history table: replace single currency column with old_currency + new_currency
+const histCols = db.pragma('table_info(subscription_price_history)').map(c => c.name);
+if (histCols.includes('currency') && !histCols.includes('old_currency')) {
+  db.exec(`
+    DROP TABLE subscription_price_history;
+    CREATE TABLE subscription_price_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      subscription_id INTEGER NOT NULL,
+      old_cost REAL NOT NULL,
+      new_cost REAL NOT NULL,
+      old_currency TEXT NOT NULL,
+      new_currency TEXT NOT NULL,
+      changed_at TEXT NOT NULL,
+      FOREIGN KEY (subscription_id) REFERENCES subscriptions(id)
+    );
+  `);
+}
+
 // Insert seed data if tables are empty
 const seed = db.transaction(() => {
   const categoryCount = db.prepare('SELECT COUNT(*) as count FROM categories').get();
