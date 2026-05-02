@@ -1,6 +1,8 @@
 const db = require('../db/database');
 
-// Builds and runs a filtered SELECT query for subscriptions
+const SORTABLE_COLUMNS = new Set(['name', 'cost', 'next_payment_date', 'created_at']);
+
+// Builds and runs a filtered + sorted SELECT query for subscriptions
 function getAllSubscriptions(filters = {}) {
   const conditions = [];
   const params = [];
@@ -22,8 +24,11 @@ function getAllSubscriptions(filters = {}) {
     params.push(`%${filters.q}%`);
   }
 
+  const sortColumn = SORTABLE_COLUMNS.has(filters.sort_by) ? filters.sort_by : 'next_payment_date';
+  const sortOrder = (filters.order || '').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
   const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
-  return db.prepare(`SELECT * FROM subscriptions ${where} ORDER BY next_payment_date ASC`).all(...params);
+  return db.prepare(`SELECT * FROM subscriptions ${where} ORDER BY ${sortColumn} ${sortOrder}`).all(...params);
 }
 
 // Returns single subscription or null if not found

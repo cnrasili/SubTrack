@@ -18,6 +18,8 @@ router.get('/', (req, res) => {
     billing_period: req.query.billing_period,
     is_active: req.query.is_active !== undefined ? Number(req.query.is_active) : undefined,
     q: req.query.q,
+    sort_by: req.query.sort_by,
+    order: req.query.order,
   };
   res.json(subscriptionService.getAllSubscriptions(filters));
 });

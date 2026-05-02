@@ -21,6 +21,10 @@ function validateSubscription(data) {
   if (!data.next_payment_date) errors.push('next_payment_date is required');
   else if (!DATE_PATTERN.test(data.next_payment_date) || isNaN(Date.parse(data.next_payment_date))) {
     errors.push('next_payment_date must be a valid date in YYYY-MM-DD format');
+  } else {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    if (data.next_payment_date < today) errors.push('next_payment_date cannot be in the past');
   }
 
   const categoryId = Number(data.category_id);

@@ -29,6 +29,15 @@ views.subscriptions = {
               <option value="1">Active</option>
               <option value="0">Inactive</option>
             </select>
+            <select id="filter-sort">
+              <option value="next_payment_date" ${(filters.sort_by || 'next_payment_date') === 'next_payment_date' ? 'selected' : ''}>Sort: Date</option>
+              <option value="cost"              ${filters.sort_by === 'cost'              ? 'selected' : ''}>Sort: Cost</option>
+              <option value="name"              ${filters.sort_by === 'name'              ? 'selected' : ''}>Sort: Name</option>
+            </select>
+            <select id="filter-order">
+              <option value="ASC"  ${(filters.order || 'ASC') === 'ASC'  ? 'selected' : ''}>&#x2191; Asc</option>
+              <option value="DESC" ${filters.order === 'DESC'            ? 'selected' : ''}>&#x2193; Desc</option>
+            </select>
           </div>
 
           <form id="sub-form">
@@ -149,6 +158,8 @@ views.subscriptions = {
           category_id: document.getElementById('filter-category').value,
           billing_period: document.getElementById('filter-period').value,
           is_active: document.getElementById('filter-active').value,
+          sort_by: document.getElementById('filter-sort').value,
+          order: document.getElementById('filter-order').value,
         });
 
         document.getElementById('filter-q').addEventListener('input', () => {
@@ -162,6 +173,8 @@ views.subscriptions = {
         document.getElementById('filter-category').addEventListener('change', () => views.subscriptions.render(getFilters()));
         document.getElementById('filter-period').addEventListener('change', () => views.subscriptions.render(getFilters()));
         document.getElementById('filter-active').addEventListener('change', () => views.subscriptions.render(getFilters()));
+        document.getElementById('filter-sort').addEventListener('change', () => views.subscriptions.render(getFilters()));
+        document.getElementById('filter-order').addEventListener('change', () => views.subscriptions.render(getFilters()));
 
         const form = document.getElementById('sub-form');
         const cancelBtn = document.getElementById('sub-cancel');
