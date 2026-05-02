@@ -107,7 +107,7 @@ views.dashboard = {
         const budgetCurrencyInput = document.getElementById('budget-currency');
         const budgetFormLabel = document.getElementById('budget-form-label');
 
-        app.addEventListener('click', e => {
+        app.onclick = e => {
           const btn = e.target.closest('[data-action]');
           if (!btn) return;
           const { action, currency, amount } = btn.dataset;
@@ -126,7 +126,7 @@ views.dashboard = {
               .then(() => views.dashboard.render())
               .catch(err => alert(err.message));
           }
-        });
+        };
 
         budgetForm.addEventListener('submit', e => {
           e.preventDefault();

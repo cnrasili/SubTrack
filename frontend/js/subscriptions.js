@@ -205,7 +205,7 @@ views.subscriptions = {
           cancelBtn.style.display = 'none';
         });
 
-        app.addEventListener('click', e => {
+        app.onclick = e => {
           const btn = e.target.closest('[data-action]');
           if (!btn) return;
           const { action, id } = btn.dataset;
@@ -251,7 +251,7 @@ views.subscriptions = {
               })
               .catch(err => alert(err.message));
           }
-        });
+        };
 
         document.getElementById('history-close').addEventListener('click', () => {
           document.getElementById('price-history-panel').style.display = 'none';

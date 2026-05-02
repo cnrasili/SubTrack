@@ -54,7 +54,7 @@ views.categories = {
           cancelBtn.style.display = 'none';
         });
 
-        app.addEventListener('click', e => {
+        app.onclick = e => {
           const btn = e.target.closest('[data-action]');
           if (!btn) return;
           const { action, id, name, color } = btn.dataset;
@@ -71,7 +71,7 @@ views.categories = {
               .then(() => views.categories.render())
               .catch(err => alert(err.message));
           }
-        });
+        };
       })
       .catch(err => { app.innerHTML = `<p class="error">${err.message}</p>`; });
   }
