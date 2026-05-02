@@ -100,7 +100,6 @@ function getUpcomingPayments(days) {
   return db.prepare(`
     SELECT * FROM subscriptions
     WHERE is_active = 1
-      AND next_payment_date >= date('now')
       AND next_payment_date <= date('now', ? || ' days')
     ORDER BY next_payment_date ASC
   `).all(`+${days}`);

@@ -49,20 +49,19 @@ views.dashboard = {
           `).join('');
 
         const now = new Date(); now.setHours(0, 0, 0, 0);
-        const pad = n => String(n).padStart(2, '0');
-        const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-        const in3Date = new Date(now); in3Date.setDate(in3Date.getDate() + 3);
-        const in3Str = `${in3Date.getFullYear()}-${pad(in3Date.getMonth() + 1)}-${pad(in3Date.getDate())}`;
 
         const upcomingRows = upcoming.map(s => {
-          const urgency = s.next_payment_date <= todayStr ? 'urgent'
-            : s.next_payment_date <= in3Str ? 'soon'
-            : '';
-          const urgencyBadge = s.next_payment_date <= todayStr
+          const [y, mo, d] = s.next_payment_date.split('-').map(Number);
+          const nextDate = new Date(y, mo - 1, d);
+          const diff = Math.round((nextDate - now) / 86400000);
+          const urgency = diff <= 3 ? 'urgent' : 'soon';
+          const urgencyBadge = diff < 0
+            ? '<span class="badge badge-urgent">Overdue</span>'
+            : diff === 0
             ? '<span class="badge badge-urgent">Today</span>'
-            : s.next_payment_date <= in3Str
-            ? '<span class="badge badge-soon">Soon</span>'
-            : '';
+            : diff <= 3
+            ? `<span class="badge badge-urgent">${diff} ${diff === 1 ? 'day' : 'days'} left</span>`
+            : `<span class="badge badge-soon">${diff} days left</span>`;
           return `
             <tr class="${urgency}">
               <td>${s.name}</td>
