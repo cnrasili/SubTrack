@@ -32,25 +32,49 @@ views.subscriptions = {
           </div>
 
           <form id="sub-form">
+            <p class="form-title" id="form-title">New Subscription</p>
             <input type="hidden" id="sub-id">
-            <input type="text" id="sub-name" placeholder="Name" required>
-            <input type="number" id="sub-cost" placeholder="Cost" step="0.01" min="0.01" required>
-            <select id="sub-period">
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-            <input type="date" id="sub-date" required>
-            <select id="sub-category" required>
-              ${catOptions}
-            </select>
-            <select id="sub-currency">
-              <option value="TRY">TRY</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
-            <input type="text" id="sub-notes" placeholder="Notes (optional)">
-            <button type="submit">Save</button>
-            <button type="button" id="sub-cancel" style="display:none">Cancel</button>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="sub-name">Name</label>
+                <input type="text" id="sub-name" placeholder="e.g. Netflix" required>
+              </div>
+              <div class="form-group">
+                <label for="sub-cost">Cost</label>
+                <input type="number" id="sub-cost" placeholder="0.00" step="0.01" min="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="sub-period">Billing Period</label>
+                <select id="sub-period">
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="sub-date">Next Payment</label>
+                <input type="date" id="sub-date" required>
+              </div>
+              <div class="form-group">
+                <label for="sub-category">Category</label>
+                <select id="sub-category" required>${catOptions}</select>
+              </div>
+              <div class="form-group">
+                <label for="sub-currency">Currency</label>
+                <select id="sub-currency">
+                  <option value="TRY">TRY</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+              <div class="form-group form-group-full">
+                <label for="sub-notes">Notes</label>
+                <input type="text" id="sub-notes" placeholder="Optional notes">
+              </div>
+              <div class="form-actions">
+                <button type="button" id="sub-cancel" class="btn-secondary" style="display:none">Cancel</button>
+                <button type="submit">Save Subscription</button>
+              </div>
+            </div>
           </form>
 
           <table>
@@ -60,25 +84,39 @@ views.subscriptions = {
             <tbody id="subs-tbody"></tbody>
           </table>
 
-          <div id="price-history-panel" style="display:none">
-            <h3 id="history-title"></h3>
-            <table id="history-table">
-              <thead>
-                <tr><th>Old Price</th><th>New Price</th><th>Date</th></tr>
-              </thead>
-              <tbody id="history-tbody"></tbody>
-            </table>
-            <button id="history-close">Close</button>
+          <div id="price-history-panel" class="modal-overlay" style="display:none">
+            <div class="modal">
+              <div class="modal-header">
+                <h3 id="history-title"></h3>
+                <button id="history-close" class="btn-close">&#x2715;</button>
+              </div>
+              <table>
+                <thead>
+                  <tr><th>Old Price</th><th>New Price</th><th>Date</th></tr>
+                </thead>
+                <tbody id="history-tbody"></tbody>
+              </table>
+            </div>
           </div>
         `;
 
         const subMap = Object.fromEntries(subscriptions.map(s => [s.id, s]));
 
         const renderRows = subs => {
+          const today = new Date(); today.setHours(0, 0, 0, 0);
           document.getElementById('subs-tbody').innerHTML = subs.map(s => {
             const cat = catMap[s.category_id];
+            const diff = Math.ceil((new Date(s.next_payment_date) - today) / 86400000);
+            const urgencyClass = diff <= 3 ? 'urgent' : diff <= 7 ? 'soon' : '';
+            const urgencyBadge = diff <= 0
+              ? '<span class="badge badge-urgent">Today</span>'
+              : diff <= 3
+              ? `<span class="badge badge-urgent">${diff}d</span>`
+              : diff <= 7
+              ? `<span class="badge badge-soon">${diff}d</span>`
+              : '';
             return `
-              <tr data-id="${s.id}">
+              <tr data-id="${s.id}" class="${urgencyClass}">
                 <td>
                   ${s.name}
                   ${s.notes ? `<span class="sub-notes">${s.notes}</span>` : ''}
@@ -88,12 +126,12 @@ views.subscriptions = {
                 </td>
                 <td>${s.cost.toFixed(2)} ${s.currency}</td>
                 <td>${s.billing_period}</td>
-                <td>${s.next_payment_date}</td>
-                <td>${s.is_active ? 'Yes' : 'No'}</td>
+                <td>${s.next_payment_date} ${urgencyBadge}</td>
+                <td><span class="badge ${s.is_active ? 'badge-active' : 'badge-inactive'}">${s.is_active ? 'Active' : 'Inactive'}</span></td>
                 <td>
-                  <button data-action="edit" data-id="${s.id}">Edit</button>
-                  <button data-action="delete" data-id="${s.id}">Delete</button>
-                  <button data-action="history" data-id="${s.id}" data-name="${s.name}">History</button>
+                  <button class="btn-sm" data-action="edit" data-id="${s.id}">Edit</button>
+                  <button class="btn-sm" data-action="delete" data-id="${s.id}">Delete</button>
+                  <button class="btn-sm" data-action="history" data-id="${s.id}" data-name="${s.name}">History</button>
                 </td>
               </tr>
             `;
@@ -145,6 +183,7 @@ views.subscriptions = {
 
         cancelBtn.addEventListener('click', () => {
           document.getElementById('sub-id').value = '';
+          document.getElementById('form-title').textContent = 'New Subscription';
           form.reset();
           cancelBtn.style.display = 'none';
         });
@@ -164,6 +203,7 @@ views.subscriptions = {
             document.getElementById('sub-category').value = s.category_id;
             document.getElementById('sub-currency').value = s.currency;
             document.getElementById('sub-notes').value = s.notes ?? '';
+            document.getElementById('form-title').textContent = 'Edit Subscription';
             cancelBtn.style.display = '';
             form.scrollIntoView({ behavior: 'smooth' });
           }
