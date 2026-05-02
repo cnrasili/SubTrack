@@ -106,6 +106,18 @@ describe('subscriptionAnalyzer', () => {
     });
   });
 
+  describe('calcMonthlyEquivalent', () => {
+    it('groups monthly-equivalent costs by currency', () => {
+      const subs = [
+        { cost: 10, billing_period: 'monthly', currency: 'TRY' },
+        { cost: 24, billing_period: 'yearly',  currency: 'TRY' },
+        { cost: 5,  billing_period: 'monthly', currency: 'USD' },
+      ];
+      // TRY: 10 + (24/12) = 12, USD: 5
+      expect(calcMonthlyEquivalent(subs)).toEqual({ TRY: 12, USD: 5 });
+    });
+  });
+
   describe('calcInactiveWaste', () => {
     it('returns empty object when all subscriptions are active', () => {
       const subs = [{ cost: 10, billing_period: 'monthly', is_active: 1, currency: 'TRY' }];

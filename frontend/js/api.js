@@ -11,6 +11,7 @@ async function request(method, path, body) {
   return res.json();
 }
 
+// eslint-disable-next-line no-unused-vars
 const api = {
   getCategories: () => request('GET', '/categories'),
   createCategory: (data) => request('POST', '/categories', data),
