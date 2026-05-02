@@ -106,14 +106,18 @@ views.subscriptions = {
           const today = new Date(); today.setHours(0, 0, 0, 0);
           document.getElementById('subs-tbody').innerHTML = subs.map(s => {
             const cat = catMap[s.category_id];
-            const diff = Math.ceil((new Date(s.next_payment_date) - today) / 86400000);
-            const urgencyClass = diff <= 3 ? 'urgent' : diff <= 7 ? 'soon' : '';
-            const urgencyBadge = diff <= 0
+            const [y, mo, d] = s.next_payment_date.split('-').map(Number);
+            const nextDate = new Date(y, mo - 1, d);
+            const diff = Math.round((nextDate - today) / 86400000);
+            const urgencyClass = diff < 0 ? 'urgent' : diff <= 3 ? 'urgent' : diff <= 7 ? 'soon' : '';
+            const urgencyBadge = diff < 0
+              ? '<span class="badge badge-urgent">Overdue</span>'
+              : diff === 0
               ? '<span class="badge badge-urgent">Today</span>'
               : diff <= 3
-              ? `<span class="badge badge-urgent">${diff}d</span>`
+              ? `<span class="badge badge-urgent">${diff} ${diff === 1 ? 'day' : 'days'} left</span>`
               : diff <= 7
-              ? `<span class="badge badge-soon">${diff}d</span>`
+              ? `<span class="badge badge-soon">${diff} days left</span>`
               : '';
             return `
               <tr data-id="${s.id}" class="${urgencyClass}">
