@@ -40,6 +40,14 @@ views.dashboard = {
             </div>
           `).join('');
 
+        const yearlyCards = Object.entries(summary.yearly)
+          .map(([currency, amount]) => `
+            <div class="card">
+              <div class="card-label">Yearly (${currency})</div>
+              <div class="card-value">${amount.toFixed(2)}</div>
+            </div>
+          `).join('');
+
         const now = new Date(); now.setHours(0, 0, 0, 0);
         const pad = n => String(n).padStart(2, '0');
         const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
@@ -72,6 +80,7 @@ views.dashboard = {
               <div class="card-value">${summary.total_active}</div>
             </div>
             ${monthlyCards}
+            ${yearlyCards}
           </div>
           <div class="section-card">
             <div class="section-header">

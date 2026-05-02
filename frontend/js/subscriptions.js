@@ -75,6 +75,10 @@ views.subscriptions = {
                   <option value="EUR">EUR</option>
                 </select>
               </div>
+              <div class="form-group">
+                <label for="sub-active">Active</label>
+                <input type="checkbox" id="sub-active" checked>
+              </div>
               <div class="form-group form-group-full">
                 <label for="sub-notes">Notes</label>
                 <input type="text" id="sub-notes" placeholder="Optional notes">
@@ -190,7 +194,7 @@ views.subscriptions = {
             category_id: parseInt(document.getElementById('sub-category').value),
             currency: document.getElementById('sub-currency').value,
             notes: document.getElementById('sub-notes').value.trim(),
-            is_active: 1,
+            is_active: document.getElementById('sub-active').checked ? 1 : 0,
           };
           const action = id ? api.updateSubscription(id, data) : api.createSubscription(data);
           action
@@ -219,6 +223,7 @@ views.subscriptions = {
             document.getElementById('sub-date').value = s.next_payment_date;
             document.getElementById('sub-category').value = s.category_id;
             document.getElementById('sub-currency').value = s.currency;
+            document.getElementById('sub-active').checked = s.is_active === 1;
             document.getElementById('sub-notes').value = s.notes ?? '';
             document.getElementById('form-title').textContent = 'Edit Subscription';
             cancelBtn.style.display = '';
